@@ -1,5 +1,12 @@
+import Sidebar from "./components/Sidebar";
+
 function App() {
-  return <div className="text-red-500">App</div>;
+  return (
+    <div className="flex w-full h-screen bg-surface">
+      <Sidebar />
+      <div className="flex-1"></div>
+    </div>
+  );
 }
 
 export default App;
