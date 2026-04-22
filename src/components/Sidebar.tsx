@@ -1,6 +1,7 @@
 import {
   BadgeQuestionMark,
   ChartColumnStacked,
+  PlusIcon,
   Settings,
   SquareChartGantt,
   SquareKanban,
@@ -9,8 +10,8 @@ import {
 
 function Sidebar() {
   return (
-    <div className=" w-72 bg-surface-low flex flex-col items-center">
-      <div className="flex gap-2 pt-4 pr-8">
+    <div className=" w-72 bg-surface-low flex flex-col items-center shrink-0">
+      <div className="flex gap-2 py-4 pr-8">
         <div className="self-center bg-primary rounded py-1 px-1.5">
           <TerminalSquareIcon size={32} className=" p-0.5 text-white" />
         </div>
@@ -22,6 +23,13 @@ function Sidebar() {
             V3 Architecture
           </p>
         </div>
+      </div>
+
+      <div className="px-4 w-full">
+        <button className="flex w-full justify-center items-center gap-1 bg-primary text-surface-lowest py-3 px-4 text-lg font-semibold rounded-lg cursor-pointer">
+          <PlusIcon size={20} />
+          Create Board
+        </button>
       </div>
 
       <div className="flex-1 flex flex-col justify-between w-full py-6 px-4 ">
