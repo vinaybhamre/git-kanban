@@ -1,3 +1,5 @@
+import useProjectContext from "@/hooks/useProjectContext";
+import type { ProjectAction } from "@/types";
 import {
   CalendarIcon,
   FilePen,
@@ -6,8 +8,35 @@ import {
   PlusSquare,
   UserCircle2,
 } from "lucide-react";
+import { nanoid } from "nanoid";
+import { useState } from "react";
 
-function CreateTaskForm({ setOpen }) {
+type CreatTaskPropsType = {
+  columnId: string;
+  boardId: string;
+  setOpen: (value: boolean) => void;
+};
+
+function CreateTaskForm({ setOpen, columnId, boardId }: CreatTaskPropsType) {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+
+  const { dispatch } = useProjectContext();
+
+  function createTaskHandler() {
+    const task = {
+      taskId: nanoid(),
+      taskTitle: title,
+      description,
+    };
+    const action: ProjectAction = {
+      type: "create task",
+      payload: { boardId, columnId, task },
+    };
+
+    dispatch(action);
+  }
+
   return (
     <div className="flex justify-center">
       <div className="p-8 w-2xl space-y-4">
@@ -29,6 +58,8 @@ function CreateTaskForm({ setOpen }) {
               type="text"
               name="taskTitle"
               className="py-2 px-4 text-xl bg-surface-low  rounded  w-full"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
             />
           </div>
           <div className="space-y-2">
@@ -41,6 +72,8 @@ function CreateTaskForm({ setOpen }) {
             <textarea
               name="description"
               className="bg-surface-low w-full h-full min-h-52 text-lg rounded p-2 resize-none"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
             ></textarea>
           </div>
         </div>
@@ -52,7 +85,10 @@ function CreateTaskForm({ setOpen }) {
             Cancel
           </button>
           <button
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              createTaskHandler();
+              setOpen(false);
+            }}
             className="bg-primary text-surface-lowest py-3 px-8 text-lg font-semibold rounded-lg cursor-pointer"
           >
             Create Task

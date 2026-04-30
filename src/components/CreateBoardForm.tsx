@@ -2,64 +2,42 @@ import useProjectContext from "@/hooks/useProjectContext";
 import type { ProjectAction } from "@/types";
 import { FilePen, FolderOpen } from "lucide-react";
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
 
-function CreateColumnForm({ setOpen }) {
+function CreateBoardForm({ setOpen }) {
   const [title, setTitle] = useState("");
 
-  const { project, dispatch } = useProjectContext();
+  const { dispatch } = useProjectContext();
 
-  const navigate = useNavigate();
-
-  const { boardId } = useParams();
-
-  function createNewColumnHandler() {
-    function handleError() {
-      setOpen(false);
-      navigate("/1");
-    }
-
-    if (!boardId || !title.trim()) {
-      handleError();
-      return;
-    }
-
-    const currentBoard = project.boards.find(
-      (board) => board.boardId === boardId,
-    );
-
-    if (!currentBoard) {
-      handleError();
-      return;
-    }
-
+  function createNewBoardHandler() {
     const action: ProjectAction = {
-      type: "create column",
-      payload: { boardId, columnTitle: title },
+      type: "create board",
+      payload: { boardTitle: title },
     };
     dispatch(action);
   }
+
   return (
     <div className="flex justify-center">
-      <div className="p-8 w-2xl space-y-8">
+      <div className="p-8 w-2xl space-y-4">
         <div className="space-y-4">
           <div className="text-on-surface-variant font-medium flex  gap-4">
-            <FolderOpen /> <p>Project Title / Board Title </p>
+            <FolderOpen /> <p>Project Title / Board Title / Column Title</p>
           </div>
           <h2 className="text-2xl font-bold text-on-surface">
-            Create new column
+            Create new board
           </h2>
           <div className="space-y-2">
             <div className="flex gap-2 items-center">
               <FilePen size={20} />
               <span className="text-lg text-on-surface font-bold capitalize">
-                Column title
+                Board Title
               </span>
             </div>
             <input
               type="text"
-              name="columnTitle"
+              name="boardTitle"
               className="py-2 px-4 text-xl bg-surface-low  rounded  w-full"
+              value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
           </div>
@@ -73,12 +51,12 @@ function CreateColumnForm({ setOpen }) {
           </button>
           <button
             onClick={() => {
-              createNewColumnHandler();
+              createNewBoardHandler();
               setOpen(false);
             }}
             className="bg-primary text-surface-lowest py-3 px-8 text-lg font-semibold rounded-lg cursor-pointer"
           >
-            Create Column
+            Create Board
           </button>
         </div>
       </div>
@@ -86,4 +64,4 @@ function CreateColumnForm({ setOpen }) {
   );
 }
 
-export default CreateColumnForm;
+export default CreateBoardForm;

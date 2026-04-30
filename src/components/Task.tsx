@@ -1,6 +1,6 @@
 import { CalendarIcon, GripVertical, UserCircle2 } from "lucide-react";
 
-function Task() {
+function Task({ task }) {
   return (
     <div className="h-52 flex flex-col justify-between bg-surface-lowest rounded p-4 hover:shadow-md transition-shadow">
       <div className="flex justify-between items-center">
@@ -11,7 +11,7 @@ function Task() {
       </div>
       <div className="flex-1 border-b my-3 border-b-on-surface-variant/10 overflow-hidden">
         <p className="text-lg font-semibold line-clamp-3 text-on-surface">
-          Migrate kubernetes cluster to v1.28 and update their helm charts
+          {task.taskTitle}
         </p>
       </div>
       <div className="flex justify-between">

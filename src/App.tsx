@@ -1,16 +1,17 @@
+import { Route, Routes } from "react-router-dom";
 import Board from "./components/Board";
-import Header from "./components/Header";
-import Sidebar from "./components/Sidebar";
+import ProjectContextProvider from "./context/ProjectContextProvider";
+import BoardLayout from "./layouts/BoardLayout";
 
 function App() {
   return (
-    <div className="flex w-full h-screen overflow-hidden bg-surface">
-      <Sidebar />
-      <main className="flex-1 flex flex-col min-w-0">
-        <Header />
-        <Board />
-      </main>
-    </div>
+    <ProjectContextProvider>
+      <Routes>
+        <Route element={<BoardLayout />}>
+          <Route path="/:boardId" element={<Board />} />
+        </Route>
+      </Routes>
+    </ProjectContextProvider>
   );
 }
 
