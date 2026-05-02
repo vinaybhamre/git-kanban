@@ -1,4 +1,4 @@
-import { useProjectData } from "@/store";
+import useProjectContext from "@/hooks/useProjectContext";
 import { EditIcon, ListFilter, PlusIcon, Share2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import CreateColumnForm from "./CreateColumnForm";
@@ -11,7 +11,7 @@ function BoardHeader({ title, boardId }: { title: string; boardId: string }) {
   const [editBoardTitle, setEditBoardTitle] = useState(false);
   const [boardTitle, setBoardTitle] = useState(title);
 
-  const { dispatch } = useProjectData();
+  const { dispatch } = useProjectContext();
 
   useEffect(() => {
     if (editBoardTitle) {

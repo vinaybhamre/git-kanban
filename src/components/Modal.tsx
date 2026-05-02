@@ -6,7 +6,7 @@ function Modal({ isOpen, setOpen, children }) {
       {isOpen && (
         <div
           onClick={setOpen}
-          className="fixed inset-0 bg-on-surface/50 flex justify-center items-center"
+          className="fixed inset-0 bg-on-surface/50 flex justify-center items-center mb-0"
         >
           <div
             onClick={(e) => {

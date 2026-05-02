@@ -43,4 +43,15 @@ export type ProjectAction =
   | {
       type: "rename column";
       payload: { boardId: string; columnId: string; columnTitle: string };
+    }
+  | {
+      type: "move task";
+      payload: {
+        boardId: string;
+        taskId: string;
+        // targetType: "task" | "column";
+        targetColumnId: string;
+        targetId: string;
+        sourceColumnId: string;
+      };
     };

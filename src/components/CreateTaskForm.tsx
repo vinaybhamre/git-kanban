@@ -25,7 +25,7 @@ function CreateTaskForm({ setOpen, columnId, boardId }: CreatTaskPropsType) {
 
   function createTaskHandler() {
     const task = {
-      taskId: nanoid(),
+      taskId: `task-${nanoid()}`,
       taskTitle: title,
       description,
     };

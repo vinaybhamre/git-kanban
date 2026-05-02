@@ -7,7 +7,7 @@ import {
   UserCircle2,
 } from "lucide-react";
 
-function TaskDetails() {
+function TaskDetails({ task }) {
   return (
     <div className="flex justify-center">
       <div className="p-8 w-2xl flex flex-col gap-10">
@@ -30,15 +30,7 @@ function TaskDetails() {
           </div> */}
           <div className="flex gap-2 items-start justify-between">
             <h3 className="font-bold text-on-surface text-3xl line-clamp-3">
-              Integrate dnd-kit for drag and drop Lorem ipsum dolor sit amet
-              consectetur adipisicing elit. Deserunt necessitatibus perspiciatis
-              expedita totam maxime illo dolores, porro minima velit sed ullam
-              aperiam provident voluptates ipsum ratione obcaecati voluptatum,
-              illum quo! Animi architecto fugit, ad nulla vitae labore
-              reprehenderit. Cupiditate quod tenetur nesciunt deleniti illo
-              illum architecto quo perspiciatis. Doloribus a repudiandae eveniet
-              praesentium quos voluptate nostrum placeat consequatur rerum
-              veniam!
+              {task.taskTitle}
             </h3>
             <p className="text-primary cursor-pointer">Edit</p>
           </div>
@@ -57,10 +49,8 @@ function TaskDetails() {
             name="description"
             className="bg-surface-low w-full h-full min-h-52 rounded p-2 resize-none"
             readOnly
-          >
-            Lorem ipsum dolor sit amet consectetur, adipisicing elit.
-            Doloremque, consequuntur.
-          </textarea>
+            defaultValue={task.description}
+          />
         </div>
       </div>
       <div className=" w-72 px-5 pt-5 bg-surface-low space-y-8 shrink-0 rounded-e-lg">

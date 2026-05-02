@@ -1,6 +1,6 @@
 import { customAlphabet } from "nanoid";
 import { useReducer } from "react";
-import type { ProjectAction, ProjectType } from "./types";
+import type { ColumnType, ProjectAction, ProjectType, TaskType } from "./types";
 
 const initialState: ProjectType = {
   projectId: "1",
@@ -8,15 +8,15 @@ const initialState: ProjectType = {
   projectSubtitle: "v4 architecture",
   boards: [
     {
-      boardId: "1",
+      boardId: "board1",
       boardTitle: "Board One",
       columns: [
         {
-          columnId: "1",
+          columnId: "column1",
           columnTitle: "Column One",
           tasks: [
             {
-              taskId: "1",
+              taskId: "task1",
               taskTitle: "Task Title one",
               description: "",
             },
@@ -29,7 +29,7 @@ const initialState: ProjectType = {
 
 const generateId = customAlphabet(
   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-  12,
+  8,
 );
 
 function projectReducer(
@@ -71,7 +71,7 @@ function projectReducer(
             columns: [
               ...board.columns,
               {
-                columnId: generateId(),
+                columnId: `column-${generateId()}`,
                 columnTitle: action.payload.columnTitle,
                 tasks: [],
               },
@@ -104,7 +104,6 @@ function projectReducer(
 
       return { ...state, boards: boardsAfterColumnRename };
     }
-
     case "create task": {
       const boardToAdd = state.boards.map((board) => {
         if (board.boardId === action.payload.boardId) {
@@ -132,6 +131,137 @@ function projectReducer(
       });
 
       return { ...state, boards: boardToAdd };
+    }
+    case "move task": {
+      let newBoards = [];
+
+      if (action.payload.sourceColumnId === action.payload.targetColumnId) {
+        const boards = state.boards.map((board) => {
+          if (board.boardId !== action.payload.boardId) return board;
+          return {
+            ...board,
+            columns: board.columns.map((column) => {
+              if (column.columnId !== action.payload.targetColumnId)
+                return column;
+
+              const srcTask = column.tasks.find(
+                (task) => task.taskId === action.payload.taskId,
+              );
+
+              if (!srcTask) {
+                return column;
+              }
+
+              const filteredTasks = column.tasks.filter(
+                (task) => task.taskId !== action.payload.taskId,
+              );
+
+              if (action.payload.targetId === action.payload.targetColumnId) {
+                return { ...column, tasks: [...filteredTasks, srcTask] };
+              }
+
+              const targetIndex = filteredTasks.findIndex(
+                (task) => task.taskId === action.payload.targetId,
+              );
+              if (targetIndex === -1)
+                return { ...column, tasks: [...filteredTasks, srcTask] };
+
+              const tasks = filteredTasks.slice();
+
+              tasks.splice(targetIndex, 0, srcTask);
+
+              return { ...column, tasks };
+            }),
+          };
+        });
+        newBoards = [...boards];
+      } else {
+        const boards = state.boards.map((board) => {
+          if (board.boardId === action.payload.boardId) {
+            const srcColumn = board.columns.find(
+              (column: ColumnType) =>
+                column.columnId === action.payload.sourceColumnId,
+            );
+
+            if (!srcColumn || !action.payload.targetColumnId) {
+              return board;
+            }
+
+            const targetColumn = board.columns.find(
+              (column: ColumnType) =>
+                column.columnId === action.payload.targetColumnId,
+            );
+
+            if (!targetColumn) {
+              return board;
+            }
+
+            const srcTask = srcColumn.tasks.find(
+              (task: TaskType) => task.taskId === action.payload.taskId,
+            );
+
+            if (!srcTask) {
+              return board;
+            }
+
+            // above process same in both scenario
+
+            const columnWithTask = board.columns.map((column: ColumnType) => {
+              if (column.columnId === action.payload.targetColumnId) {
+                const droppedOnColumn =
+                  action.payload.targetId === action.payload.targetColumnId;
+
+                if (droppedOnColumn) {
+                  return {
+                    ...column,
+                    tasks: [...column.tasks, srcTask],
+                  };
+                }
+
+                const taskIndex = column.tasks.findIndex(
+                  (task) => task.taskId === action.payload.targetId,
+                );
+
+                if (taskIndex === -1) {
+                  return {
+                    ...column,
+                    tasks: [...column.tasks, srcTask],
+                  };
+                }
+
+                const tasks = column.tasks.slice();
+
+                tasks.splice(taskIndex, 0, srcTask);
+
+                return { ...column, tasks };
+              }
+
+              return column;
+            });
+
+            const columnWithoutTask = columnWithTask.map(
+              (column: ColumnType) => {
+                if (column.columnId === action.payload.sourceColumnId) {
+                  const tasksWithout = column.tasks.filter(
+                    (task: TaskType) => task.taskId !== action.payload.taskId,
+                  );
+
+                  return { ...column, tasks: tasksWithout };
+                } else {
+                  return column;
+                }
+              },
+            );
+
+            return { ...board, columns: columnWithoutTask };
+          } else {
+            return board;
+          }
+        });
+        newBoards = [...boards];
+      }
+
+      return { ...state, boards: newBoards };
     }
     default:
       return state;

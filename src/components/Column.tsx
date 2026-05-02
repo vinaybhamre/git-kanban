@@ -1,5 +1,6 @@
-import { useProjectData } from "@/store";
+import useProjectContext from "@/hooks/useProjectContext";
 import type { ColumnType } from "@/types";
+import { useDroppable } from "@dnd-kit/react";
 import { EllipsisIcon, PlusIcon, Rocket } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import CreateTaskForm from "./CreateTaskForm";
@@ -9,17 +10,27 @@ import Task from "./Task";
 type ColumnPropsType = {
   column: ColumnType;
   boardId: string;
+  taskStartIndex: number;
 };
 
-function Column({ column, boardId }: ColumnPropsType) {
-  const [isOpen, setIsOpen] = useState(false);
+function Column({ column, boardId, taskStartIndex }: ColumnPropsType) {
+  const [createTaskModal, setCreateTaskModal] = useState(false);
 
   const [editColumnTitle, setEditColumnTitle] = useState(false);
   const [columnTitle, setColumnTitle] = useState(column.columnTitle);
 
   const inputRef = useRef(null);
 
-  const { dispatch } = useProjectData();
+  const { dispatch } = useProjectContext();
+
+  const { ref, isDropTarget } = useDroppable({
+    id: column.columnId,
+    data: {
+      targetColumnId: column.columnId,
+      targetId: column.columnId,
+      targetType: "column",
+    },
+  });
 
   useEffect(() => {
     if (editColumnTitle) {
@@ -37,8 +48,13 @@ function Column({ column, boardId }: ColumnPropsType) {
     }
   }
 
+  console.log("IsDropTarget from column: ", isDropTarget);
+
   return (
-    <div className="w-96 shrink-0 rounded-xl bg-surface-low flex flex-col p-4">
+    <div
+      ref={ref}
+      className={`w-96 shrink-0 rounded-xl bg-surface-low flex flex-col p-4`}
+    >
       <div className="flex items-center justify-between pb-2">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <span className="truncate text-lg font-semibold">
@@ -68,20 +84,40 @@ function Column({ column, boardId }: ColumnPropsType) {
         />
       </div>
       {column.tasks.length === 0 ? (
-        <div className="flex-1 overflow-y-auto flex flex-col justify-center items-center border-2 rounded-xl border-dashed  border-on-surface-variant/10">
-          <Rocket className=" w-16 h-16 fill-slate-400 text-slate-500 bg-on-surface-variant/10 p-4 rounded-2xl" />
-          <p className=" text-on-surface-variant font-medium py-2">
-            No active tasks
-          </p>
-          <p className=" text-primary font-semibold py-2">Move items here</p>
-        </div>
+        <>
+          <div
+            className={`flex-1 overflow-y-auto flex flex-col justify-center items-center border-2 rounded-xl    ${isDropTarget ? "border-solid border-emerald-300" : "border-dashed border-on-surface-variant/10"}`}
+          >
+            <Rocket className=" w-16 h-16 fill-slate-400 text-slate-500 bg-on-surface-variant/10 p-4 rounded-2xl" />
+            <p className=" text-on-surface-variant font-medium py-2">
+              No active tasks
+            </p>
+            <p className=" text-primary font-semibold py-2">
+              Move items here or
+            </p>
+          </div>
+          <div
+            onClick={() => setCreateTaskModal(true)}
+            className="overflow-y-auto flex gap-2 justify-center items-center border-2 rounded border-dashed  border-on-surface-variant/10 cursor-pointer"
+          >
+            <PlusIcon className=" w-4 h-4" />
+            <p className=" text-on-surface-variant font-medium py-2">
+              Add task
+            </p>
+          </div>
+        </>
       ) : (
         <div className="space-y-4 overflow-y-scroll custom-scrollbar pt-2 pb-4">
-          {column.tasks.map((task) => (
-            <Task key={task.taskId} task={task} />
+          {column.tasks.map((task, index) => (
+            <Task
+              key={task.taskId}
+              task={task}
+              index={taskStartIndex + index}
+              columnId={column.columnId}
+            />
           ))}
           <div
-            onClick={() => setIsOpen(true)}
+            onClick={() => setCreateTaskModal(true)}
             className="flex-1 overflow-y-auto flex gap-2 justify-center items-center border-2 rounded border-dashed  border-on-surface-variant/10 cursor-pointer"
           >
             <PlusIcon className=" w-4 h-4" />
@@ -91,9 +127,9 @@ function Column({ column, boardId }: ColumnPropsType) {
           </div>
         </div>
       )}
-      <Modal isOpen={isOpen} setOpen={() => setIsOpen(false)}>
+      <Modal isOpen={createTaskModal} setOpen={() => setCreateTaskModal(false)}>
         <CreateTaskForm
-          setOpen={setIsOpen}
+          setOpen={setCreateTaskModal}
           columnId={column.columnId}
           boardId={boardId}
         />
