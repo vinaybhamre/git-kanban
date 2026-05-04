@@ -2,6 +2,7 @@ import useProjectContext from "@/hooks/useProjectContext";
 import type { ProjectAction } from "@/types";
 import {
   CalendarIcon,
+  ChevronDown,
   FilePen,
   FileTextIcon,
   FolderOpen,
@@ -21,20 +22,35 @@ function CreateTaskForm({ setOpen, columnId, boardId }: CreatTaskPropsType) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
-  const { dispatch } = useProjectContext();
+  const [selectedColumnId, setSelectedColumnId] = useState(columnId || "");
+
+  const { stateStore, dispatch } = useProjectContext();
+
+  const board = stateStore.boards[boardId];
+
+  if (!board) return null;
+
+  const boardColumns = board.columnIds.map(
+    (colId) => stateStore.columns[colId],
+  );
 
   function createTaskHandler() {
+    if (!title.trim()) return false;
+
     const task = {
       taskId: `task-${nanoid()}`,
       taskTitle: title,
       description,
     };
+
     const action: ProjectAction = {
       type: "create task",
-      payload: { boardId, columnId, task },
+      payload: { boardId, columnId: selectedColumnId, task },
     };
 
     dispatch(action);
+
+    return true;
   }
 
   return (
@@ -64,6 +80,33 @@ function CreateTaskForm({ setOpen, columnId, boardId }: CreatTaskPropsType) {
           </div>
           <div className="space-y-2">
             <div className="flex gap-2 items-center">
+              <span className="text-lg text-on-surface font-bold capitalize">
+                Column
+              </span>
+            </div>
+            <div className="relative">
+              <select
+                value={selectedColumnId}
+                onChange={(e) => setSelectedColumnId(e.target.value)}
+                className="py-2 px-4 text-xl bg-surface-low rounded w-full appearance-none cursor-pointer"
+              >
+                <option value="" disabled>
+                  Select column
+                </option>
+
+                {boardColumns.map((col) =>
+                  col ? (
+                    <option key={col.columnId} value={col.columnId}>
+                      {col.columnTitle}
+                    </option>
+                  ) : null,
+                )}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant pointer-events-none" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="flex gap-2 items-center">
               <FileTextIcon size={20} />
               <span className="text-lg text-on-surface font-bold capitalize">
                 Description
@@ -86,8 +129,8 @@ function CreateTaskForm({ setOpen, columnId, boardId }: CreatTaskPropsType) {
           </button>
           <button
             onClick={() => {
-              createTaskHandler();
-              setOpen(false);
+              const success = createTaskHandler();
+              if (success) setOpen(false);
             }}
             className="bg-primary text-surface-lowest py-3 px-8 text-lg font-semibold rounded-lg cursor-pointer"
           >

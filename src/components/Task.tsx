@@ -2,23 +2,20 @@ import { CalendarIcon, GripVertical, UserCircle2 } from "lucide-react";
 import { useState } from "react";
 // import Draggable from "./Draggable";
 // import { useDroppable } from "@dnd-kit/react";
+import useProjectContext from "@/hooks/useProjectContext";
 import Modal from "./Modal";
 import Sortable from "./Sortable";
 import TaskDetails from "./TaskDetails";
 
-function Task({ task, index, columnId }) {
+function Task({ taskId, index, columnId }) {
   const [taskDetailsModal, setTaskDetailsModal] = useState(false);
-  // const { ref, isDropTarget } = useDroppable({
-  //   id: task.taskId,
-  //   data: {
-  //     taskId: task.taskId,
-  //     targetColumnId: columnId,
-  //     targetId: task.taskId,
-  //     targetType: "task",
-  //   },
-  // });
 
-  // console.log("IsDropTarget from task: ", isDropTarget);
+  const { stateStore } = useProjectContext();
+
+  const { tasks } = stateStore;
+  const task = tasks[taskId];
+  if (!task) return null;
+
   return (
     <>
       <Sortable id={task.taskId} index={index} columnId={columnId}>

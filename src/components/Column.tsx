@@ -1,5 +1,4 @@
 import useProjectContext from "@/hooks/useProjectContext";
-import type { ColumnType } from "@/types";
 import { useDroppable } from "@dnd-kit/react";
 import { EllipsisIcon, PlusIcon, Rocket } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -8,29 +7,18 @@ import Modal from "./Modal";
 import Task from "./Task";
 
 type ColumnPropsType = {
-  column: ColumnType;
+  columnId: string;
   boardId: string;
-  taskStartIndex: number;
 };
 
-function Column({ column, boardId, taskStartIndex }: ColumnPropsType) {
+function Column({ columnId, boardId }: ColumnPropsType) {
+  const { stateStore, dispatch } = useProjectContext();
+
   const [createTaskModal, setCreateTaskModal] = useState(false);
 
   const [editColumnTitle, setEditColumnTitle] = useState(false);
-  const [columnTitle, setColumnTitle] = useState(column.columnTitle);
 
   const inputRef = useRef(null);
-
-  const { dispatch } = useProjectContext();
-
-  const { ref, isDropTarget } = useDroppable({
-    id: column.columnId,
-    data: {
-      targetColumnId: column.columnId,
-      targetId: column.columnId,
-      targetType: "column",
-    },
-  });
 
   useEffect(() => {
     if (editColumnTitle) {
@@ -38,17 +26,33 @@ function Column({ column, boardId, taskStartIndex }: ColumnPropsType) {
     }
   }, [editColumnTitle]);
 
+  const { columns } = stateStore;
+  const column = columns[columnId];
+
+  const { ref, isDropTarget } = useDroppable({
+    id: columnId,
+    data: {
+      targetColumnId: column.columnId,
+      targetId: column.columnId,
+      targetType: "column",
+    },
+  });
+
+  if (!column) return null;
+
   function handleTitleEdit(e) {
     if (e.key === "Enter") {
       dispatch({
         type: "rename column",
-        payload: { boardId, columnId: column.columnId, columnTitle },
+        payload: {
+          boardId,
+          columnId: column.columnId,
+          columnTitle: e.currentTarget.value,
+        },
       });
       setEditColumnTitle(false);
     }
   }
-
-  console.log("IsDropTarget from column: ", isDropTarget);
 
   return (
     <div
@@ -64,17 +68,16 @@ function Column({ column, boardId, taskStartIndex }: ColumnPropsType) {
                 ref={inputRef}
                 name="boardTitle"
                 className="py-1 px-4 text-xl bg-surface-low  rounded focus:border  w-full"
-                value={columnTitle}
-                onChange={(e) => setColumnTitle(e.target.value)}
+                defaultValue={column.columnTitle}
                 onKeyDown={handleTitleEdit}
               />
             ) : (
-              columnTitle
+              column.columnTitle
             )}
           </span>
 
           <span className="shrink-0 bg-on-surface-variant/15 px-2 py-0.5 rounded-full">
-            {column.tasks.length}
+            {column.taskIds.length}
           </span>
         </div>
 
@@ -83,7 +86,7 @@ function Column({ column, boardId, taskStartIndex }: ColumnPropsType) {
           onClick={() => setEditColumnTitle(true)}
         />
       </div>
-      {column.tasks.length === 0 ? (
+      {column.taskIds.length === 0 ? (
         <>
           <div
             className={`flex-1 overflow-y-auto flex flex-col justify-center items-center border-2 rounded-xl    ${isDropTarget ? "border-solid border-emerald-300" : "border-dashed border-on-surface-variant/10"}`}
@@ -108,11 +111,11 @@ function Column({ column, boardId, taskStartIndex }: ColumnPropsType) {
         </>
       ) : (
         <div className="space-y-4 overflow-y-scroll custom-scrollbar pt-2 pb-4">
-          {column.tasks.map((task, index) => (
+          {column.taskIds.map((taskId, index) => (
             <Task
-              key={task.taskId}
-              task={task}
-              index={taskStartIndex + index}
+              key={taskId}
+              taskId={taskId}
+              index={index}
               columnId={column.columnId}
             />
           ))}

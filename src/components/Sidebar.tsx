@@ -7,19 +7,27 @@ import {
   TerminalSquareIcon,
 } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import CreateBoardForm from "./CreateBoardForm";
 import Modal from "./Modal";
 
 function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
 
-  const { project } = useProjectContext();
+  const { projectId: paramProjectId } = useParams();
+
+  const { stateStore } = useProjectContext();
 
   const navigate = useNavigate();
 
-  function navigateToBoard(boardId) {
-    navigate(`/${boardId}`);
+  if (!paramProjectId) {
+    return;
+  }
+
+  const project = stateStore.projects[paramProjectId];
+
+  function navigateToBoard(projectId: string, boardId: string) {
+    navigate(`/${projectId}/${boardId}`);
   }
 
   return (
@@ -51,14 +59,16 @@ function Sidebar() {
 
         <div className="flex-1 flex flex-col justify-between w-full py-6 px-4 ">
           <div className="space-y-3">
-            {project.boards.map((board) => (
+            {project.boardIds.map((boardId) => (
               <div
-                key={board.boardId}
+                key={boardId}
                 className=" text-primary-container flex gap-4 py-2 px-4 bg-surface-lowest rounded-md cursor-pointer"
-                onClick={() => navigateToBoard(board.boardId)}
+                onClick={() => navigateToBoard(project.projectId, boardId)}
               >
                 <SquareKanban />
-                <p className="font-medium">{board.boardTitle}</p>
+                <p className="font-medium">
+                  {stateStore.boards[boardId].boardTitle}
+                </p>
               </div>
             ))}
           </div>

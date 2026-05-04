@@ -8,7 +8,7 @@ function App() {
     <ProjectContextProvider>
       <Routes>
         <Route element={<BoardLayout />}>
-          <Route path="/:boardId" element={<Board />} />
+          <Route path="/:projectId/:boardId" element={<Board />} />
         </Route>
       </Routes>
     </ProjectContextProvider>

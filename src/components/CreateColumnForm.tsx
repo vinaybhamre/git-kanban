@@ -7,7 +7,7 @@ import { useNavigate, useParams } from "react-router-dom";
 function CreateColumnForm({ setOpen }) {
   const [title, setTitle] = useState("");
 
-  const { project, dispatch } = useProjectContext();
+  const { stateStore, dispatch } = useProjectContext();
 
   const navigate = useNavigate();
 
@@ -16,7 +16,7 @@ function CreateColumnForm({ setOpen }) {
   function createNewColumnHandler() {
     function handleError() {
       setOpen(false);
-      navigate("/1");
+      navigate("/project1/board1");
     }
 
     if (!boardId || !title.trim()) {
@@ -24,9 +24,7 @@ function CreateColumnForm({ setOpen }) {
       return;
     }
 
-    const currentBoard = project.boards.find(
-      (board) => board.boardId === boardId,
-    );
+    const currentBoard = stateStore.boards[boardId];
 
     if (!currentBoard) {
       handleError();
@@ -35,7 +33,7 @@ function CreateColumnForm({ setOpen }) {
 
     const action: ProjectAction = {
       type: "create column",
-      payload: { boardId, columnTitle: title },
+      payload: { boardId: currentBoard.boardId, columnTitle: title },
     };
     dispatch(action);
   }
@@ -59,6 +57,7 @@ function CreateColumnForm({ setOpen }) {
             <input
               type="text"
               name="columnTitle"
+              value={title}
               className="py-2 px-4 text-xl bg-surface-low  rounded  w-full"
               onChange={(e) => setTitle(e.target.value)}
             />

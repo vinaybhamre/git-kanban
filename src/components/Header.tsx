@@ -1,13 +1,15 @@
 import useProjectContext from "@/hooks/useProjectContext";
 import { Bell, CircleUserRound } from "lucide-react";
+import { useParams } from "react-router-dom";
 
 function Header() {
-  const { project } = useProjectContext();
+  const { stateStore } = useProjectContext();
+  const { projectId } = useParams();
   return (
     <div className="h-14 border-b flex justify-between px-10 items-center border-b-on-surface-variant/5">
       <div>
         <h2 className="text-2xl font-semibold text-on-surface">
-          {project.projectTitle}
+          {stateStore.projects[projectId].projectTitle}
         </h2>
       </div>
       <div className="flex gap-10 items-center">

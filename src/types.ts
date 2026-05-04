@@ -7,20 +7,27 @@ export type TaskType = {
 export type ColumnType = {
   columnId: string;
   columnTitle: string;
-  tasks: TaskType[];
+  taskIds: string[];
 };
 
 export type BoardType = {
   boardId: string;
   boardTitle: string;
-  columns: ColumnType[];
+  columnIds: string[];
 };
 
 export type ProjectType = {
   projectId: string;
   projectTitle: string;
   projectSubtitle: string;
-  boards: BoardType[];
+  boardIds: string[];
+};
+
+export type ProjectsType = {
+  projects: Record<string, ProjectType>;
+  boards: Record<string, BoardType>;
+  columns: Record<string, ColumnType>;
+  tasks: Record<string, TaskType>;
 };
 
 export type ProjectAction =
@@ -49,9 +56,8 @@ export type ProjectAction =
       payload: {
         boardId: string;
         taskId: string;
-        // targetType: "task" | "column";
-        targetColumnId: string;
-        targetId: string;
         sourceColumnId: string;
+        targetColumnId: string;
+        targetIndex: number;
       };
     };

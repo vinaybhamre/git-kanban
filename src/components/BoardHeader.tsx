@@ -9,7 +9,6 @@ function BoardHeader({ title, boardId }: { title: string; boardId: string }) {
   const inputRef = useRef(null);
 
   const [editBoardTitle, setEditBoardTitle] = useState(false);
-  const [boardTitle, setBoardTitle] = useState(title);
 
   const { dispatch } = useProjectContext();
 
@@ -23,7 +22,7 @@ function BoardHeader({ title, boardId }: { title: string; boardId: string }) {
     if (e.key === "Enter") {
       dispatch({
         type: "rename board",
-        payload: { boardId, updatedBoardTitle: boardTitle },
+        payload: { boardId, updatedBoardTitle: e.currentTarget.value },
       });
       setEditBoardTitle(false);
     }
@@ -39,12 +38,11 @@ function BoardHeader({ title, boardId }: { title: string; boardId: string }) {
               ref={inputRef}
               name="boardTitle"
               className="py-1 px-4 text-3xl bg-surface-low  rounded active:border-none focus:border-none focus-within:border-amber-300 focus-visible:border-red-50 border-none  w-full"
-              value={boardTitle}
-              onChange={(e) => setBoardTitle(e.target.value)}
+              defaultValue={title}
               onKeyDown={handleTitleEdit}
             />
           ) : (
-            <h1 className="text-3xl font-bold text-on-surface">{boardTitle}</h1>
+            <h1 className="text-3xl font-bold text-on-surface">{title}</h1>
           )}
           <EditIcon onClick={() => setEditBoardTitle(true)} />
         </div>

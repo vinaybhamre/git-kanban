@@ -1,8 +1,8 @@
-import type { ProjectAction, ProjectType } from "@/types";
+import type { ProjectAction, ProjectsType } from "@/types";
 import { createContext, type Dispatch } from "react";
 
 type ProjectContextType = {
-  project: ProjectType;
+  stateStore: ProjectsType;
   dispatch: Dispatch<ProjectAction>;
 };
 

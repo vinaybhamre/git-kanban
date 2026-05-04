@@ -1,7 +1,7 @@
 import useProjectContext from "@/hooks/useProjectContext";
 import { DragDropProvider } from "@dnd-kit/react";
 import { PlusIcon } from "lucide-react";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 import BoardHeader from "./BoardHeader";
 import Column from "./Column";
@@ -11,10 +11,7 @@ import Modal from "./Modal";
 function Board() {
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
 
-  const isDragging = useRef(false);
-  // const rafRef = useRef<number | null>(null);
-
-  const { project, dispatch } = useProjectContext();
+  const { stateStore, dispatch } = useProjectContext();
 
   const { boardId } = useParams();
 
@@ -22,7 +19,9 @@ function Board() {
     return; // todo: handle it better later
   }
 
-  const board = project.boards.find((board) => board.boardId === boardId);
+  const { boards } = stateStore;
+
+  const board = boards[boardId];
 
   if (!board) {
     return <p className="flex justify-center text-4xl font-bold">No board</p>; // todo: implement complete jsx here
@@ -38,55 +37,69 @@ function Board() {
       <DragDropProvider
         onDragStart={() => {
           console.log("Drag begin");
-          isDragging.current = true;
         }}
-        onDragEnd={(e) => {
-          console.log("onDragEnd fired, isDragging:", isDragging.current);
-          console.log("target:", e.operation.target?.data);
-
-          if (!isDragging.current) return;
-
-          isDragging.current = false;
-
-          console.log("Drag end: ", e.operation);
-
-          const taskId = e.operation.source?.id.toString();
-          const sourceId = e.operation.source?.data.srcColumnId.toString();
-          const targetId = e.operation.target?.data.targetId.toString();
+        onDragOver={(e) => {
+          const taskId = e.operation.source?.id?.toString();
+          const sourceColumnId =
+            e.operation.source?.data?.srcColumnId?.toString();
           const targetColumnId =
-            e.operation.target?.data.targetColumnId.toString();
+            e.operation.target?.data?.targetColumnId?.toString();
 
-          if (!taskId || !targetId || !sourceId) {
-            return null;
-          }
+          if (!taskId || !sourceColumnId || !targetColumnId) return;
 
-          // 👇 let dnd-kit finish its DOM cleanup before React re-renders
-          // if (rafRef.current) cancelAnimationFrame(rafRef.current); // 👈 cancel previous
+          // ignore same column
+          if (sourceColumnId === targetColumnId) return;
+
           dispatch({
             type: "move task",
             payload: {
               boardId,
               taskId,
+              sourceColumnId,
               targetColumnId,
-              targetId,
-              sourceColumnId: sourceId,
+              targetIndex: 0, // temporary insert at top
+            },
+          });
+        }}
+        onDragEnd={(e) => {
+          if (e.operation.canceled) return;
+
+          const taskId = e.operation.source?.id?.toString();
+          const sourceColumnId =
+            e.operation.source?.data?.srcColumnId?.toString();
+
+          const targetId = e.operation.target?.id?.toString();
+          const targetColumnId =
+            e.operation.target?.data?.targetColumnId?.toString();
+
+          if (!taskId || !sourceColumnId || !targetColumnId) return;
+
+          const column = stateStore.columns[targetColumnId];
+          if (!column) return;
+
+          const index = column.taskIds.indexOf(targetId);
+          const targetIndex = index === -1 ? column.taskIds.length : index;
+
+          dispatch({
+            type: "move task",
+            payload: {
+              boardId,
+              taskId,
+              sourceColumnId,
+              targetColumnId,
+              targetIndex,
             },
           });
         }}
       >
         <div className=" flex-1 overflow-x-auto overflow-y-hidden custom-scrollbar pb-4">
           <div className="flex gap-5 min-w-max h-full px-1">
-            {board?.columns?.map((column, colIndex) => {
-              const taskStartIndex = board.columns
-                .slice(0, colIndex)
-                .reduce((sum, col) => sum + col.tasks.length, 0);
-
+            {board.columnIds?.map((columnId) => {
               return (
                 <Column
-                  key={column.columnId}
-                  column={column}
+                  key={columnId}
+                  columnId={columnId}
                   boardId={board.boardId}
-                  taskStartIndex={taskStartIndex}
                 />
               );
             })}
@@ -102,7 +115,7 @@ function Board() {
       <Modal isOpen={isTaskModalOpen} setOpen={() => setIsTaskModalOpen(false)}>
         <CreateTaskForm
           setOpen={setIsTaskModalOpen}
-          columnId={"empty"} //todo: update to use actual column Id
+          columnId={""}
           boardId={board.boardId}
         />
       </Modal>

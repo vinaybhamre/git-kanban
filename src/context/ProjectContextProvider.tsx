@@ -3,9 +3,9 @@ import type { ReactNode } from "react";
 import { ProjectContext } from "./ProjectContext";
 
 function ProjectContextProvider({ children }: { children: ReactNode }) {
-  const { project, dispatch } = useProjectData();
+  const { stateStore, dispatch } = useProjectData();
   return (
-    <ProjectContext.Provider value={{ project, dispatch }}>
+    <ProjectContext.Provider value={{ stateStore, dispatch }}>
       {children}
     </ProjectContext.Provider>
   );
